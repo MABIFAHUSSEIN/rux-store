@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://js.paystack.co/v1/inline.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;0,700;1,300;1,600&family=Archivo:wght@300;400;500;600;700;900&display=swap');
+
+:root {
+  --bg:#0c0c0c;--bg2:#111111;--bg3:#161616;
+  --surface:rgba(255,255,255,0.03);--glass:rgba(255,255,255,0.055);
+  --glass2:rgba(255,255,255,0.09);--border:rgba(255,255,255,0.07);
+  --border2:rgba(255,255,255,0.13);--w:#f5f0eb;--w2:#ffffff;
+  --muted:rgba(245,240,235,0.4);--dim:rgba(245,240,235,0.2);
+  --acc:#c8a96e;--acc2:#e8d5b0;--acc3:#8b6914;
+  --acc-glow:rgba(200,169,110,0.22);--red:#c0392b;
+  --r:14px;--r2:20px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Archivo',sans-serif;background:var(--bg);color:var(--w);overflow-x:hidden;min-height:100vh;}
+.page{display:none;min-height:100vh;}
+.page.active{display:block;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--acc3);border-radius:2px;}
+
+/* ── NAV ── */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:300;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 48px;
+  background:rgba(12,12,12,0.75);backdrop-filter:blur(28px);
+  border-bottom:1px solid var(--border);
+}
+.nav-logo{font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:700;letter-spacing:0.12em;background:linear-gradient(135deg,var(--acc2),var(--acc));-webkit-background-clip:text;-webkit-text-fill-color:transparent;cursor:pointer;}
+.nav-links{display:flex;gap:36px;}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:0.78rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;transition:color 0.2s;cursor:pointer;}
+.nav-links a:hover,.nav-links a.active-link{color:var(--acc);}
+.nav-right{display:flex;align-items:center;gap:18px;}
+.cart-btn{display:flex;align-items:center;gap:8px;background:var(--glass);border:1px solid var(--border2);padding:9px 18px;border-radius:50px;font-size:0.8rem;font-weight:600;cursor:pointer;transition:background 0.2s;color:var(--w);letter-spacing:0.04em;}
+.cart-btn:hover{background:var(--glass2);}
+.cart-count{background:var(--acc);color:#0c0c0c;width:18px;height:18px;border-radius:50%;font-size:0.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.nav-auth-btn{background:var(--acc);color:#0c0c0c;border:none;padding:10px 22px;border-radius:50px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:'Archivo',sans-serif;letter-spacing:0.06em;text-transform:uppercase;transition:all 0.25s;}
+.nav-auth-btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px var(--acc-glow);}
+.nav-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--acc),var(--acc3));display:none;align-items:center;justify-content:center;font-size:0.78rem;font-weight:700;color:#0c0c0c;cursor:pointer;border:1px solid var(--border2);}
+
+.btn{font-family:'Archivo',sans-serif;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;font-size:0.78rem;border:none;cursor:pointer;transition:all 0.25s;display:inline-flex;align-items:center;gap:8px;}
+.btn-gold{background:linear-gradient(135deg,var(--acc),var(--acc3));color:#0c0c0c;padding:14px 30px;border-radius:4px;}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 12px 32px var(--acc-glow);}
+.btn-ghost{background:transparent;color:var(--w);border:1px solid var(--border2);padding:13px 26px;border-radius:4px;}
+.btn-ghost:hover{border-color:var(--acc);color:var(--acc);}
+
+/* ── HERO ── */
+.hero{position:relative;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+#scene-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1;}
+.hero-overlay-left{position:absolute;left:0;top:0;bottom:0;width:45%;background:linear-gradient(90deg,rgba(12,12,12,0.92) 40%,transparent);z-index:2;pointer-events:none;}
+.hero-overlay-bottom{position:absolute;bottom:0;left:0;right:0;height:30%;background:linear-gradient(to top,rgba(12,12,12,1),transparent);z-index:2;pointer-events:none;}
+.hero-content{position:absolute;left:48px;top:50%;transform:translateY(-50%);z-index:3;max-width:520px;}
+.hero-season{font-size:0.68rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--acc);font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.hero-season::before{content:'';width:30px;height:1px;background:var(--acc);}
+.hero-title{font-family:'Cormorant Garamond',serif;font-size:clamp(3.5rem,7vw,6.5rem);line-height:0.92;font-weight:600;letter-spacing:-0.01em;margin-bottom:20px;}
+.hero-title em{font-style:italic;background:linear-gradient(135deg,var(--acc2),var(--acc));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hero-sub{color:var(--muted);font-size:0.95rem;line-height:1.75;max-width:360px;margin-bottom:36px;font-weight:300;}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;}
+.scene-hint{position:absolute;right:48px;bottom:48px;z-index:3;display:flex;align-items:center;gap:10px;color:var(--muted);font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;}
+.hint-icon{width:36px;height:36px;border:1px solid var(--border2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.9rem;animation:spin-hint 4s linear infinite;}
+@keyframes spin-hint{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+
+/* ── TICKER ── */
+.lookbook-strip{overflow:hidden;padding:60px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg3);}
+.lookbook-ticker{display:flex;gap:0;animation:ticker 20s linear infinite;white-space:nowrap;}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.ticker-item{padding:0 40px;font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-style:italic;color:var(--muted);display:flex;align-items:center;gap:16px;flex-shrink:0;}
+.ticker-dot{width:4px;height:4px;border-radius:50%;background:var(--acc);}
+
+/* ── PRODUCTS ── */
+.section{padding:96px 48px;max-width:1400px;margin:0 auto;}
+.sec-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:56px;border-bottom:1px solid var(--border);padding-bottom:24px;}
+.sec-title{font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:600;line-height:1;letter-spacing:-0.01em;}
+.sec-title span{font-style:italic;color:var(--acc);}
+.sec-filters{display:flex;gap:8px;}
+.filter-pill{background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:8px 18px;font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;color:var(--muted);transition:all 0.2s;}
+.filter-pill.on,.filter-pill:hover{background:var(--acc);color:#0c0c0c;border-color:var(--acc);}
+.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:2px;}
+.prod-card{background:var(--bg2);position:relative;overflow:hidden;cursor:pointer;transition:transform 0.4s cubic-bezier(0.23,1,0.32,1);border:1px solid var(--border);}
+.prod-card:hover{transform:scale(1.02);z-index:2;border-color:var(--border2);}
+.prod-canvas-wrap{height:340px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--bg3);}
+.prod-3d-canvas{width:100%;height:100%;display:block;}
+.prod-badge{position:absolute;top:14px;left:14px;font-size:0.6rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:4px 10px;border-radius:2px;z-index:2;}
+.badge-new{background:var(--acc);color:#0c0c0c;}
+.badge-ltd{background:var(--w2);color:#0c0c0c;}
+.badge-sale{background:var(--red);color:#fff;}
+.prod-wish{position:absolute;top:14px;right:14px;z-index:2;width:32px;height:32px;border-radius:50%;background:rgba(12,12,12,0.7);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.85rem;transition:all 0.2s;color:var(--muted);}
+.prod-wish:hover{background:rgba(192,57,43,0.2);border-color:var(--red);color:var(--red);}
+.prod-wish.wished{color:var(--red);border-color:var(--red);}
+.prod-colors{position:absolute;bottom:14px;left:14px;z-index:2;display:flex;gap:5px;}
+.color-dot{width:10px;height:10px;border-radius:50%;border:1px solid rgba(255,255,255,0.3);}
+.prod-info{padding:20px 20px 24px;}
+.prod-label{font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--acc);font-weight:600;margin-bottom:6px;}
+.prod-name{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;line-height:1.2;margin-bottom:8px;}
+.prod-desc{font-size:0.78rem;color:var(--muted);line-height:1.6;margin-bottom:16px;}
+.prod-foot{display:flex;align-items:center;justify-content:space-between;}
+.prod-price{font-size:1.05rem;font-weight:700;font-family:'Cormorant Garamond',serif;letter-spacing:0.02em;}
+.prod-price small{font-size:0.7rem;color:var(--muted);font-weight:400;font-family:'Archivo',sans-serif;margin-left:4px;}
+.prod-add{background:transparent;border:1px solid var(--border2);color:var(--w);padding:8px 18px;border-radius:3px;font-size:0.72rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;font-family:'Archivo',sans-serif;transition:all 0.2s;}
+.prod-add:hover{background:var(--acc);border-color:var(--acc);color:#0c0c0c;}
+
+/* ══════════════════════════════════════
+   LOOKBOOK PAGE
+══════════════════════════════════════ */
+#page-lookbook{background:var(--bg);}
+
+.lb-hero{
+  height:100vh;position:relative;
+  display:flex;align-items:flex-end;
+  overflow:hidden;
+}
+.lb-hero-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:1;}
+.lb-hero-grad{
+  position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(to top,rgba(12,12,12,1) 0%,rgba(12,12,12,0.5) 50%,rgba(12,12,12,0.2) 100%);
+}
+.lb-hero-content{
+  position:relative;z-index:3;padding:0 48px 80px;
+  max-width:700px;
+}
+.lb-tag{font-size:0.68rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--acc);font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.lb-tag::before{content:'';width:30px;height:1px;background:var(--acc);}
+.lb-hero-title{font-family:'Cormorant Garamond',serif;font-size:clamp(3rem,6vw,5.5rem);line-height:0.95;font-weight:600;margin-bottom:20px;}
+.lb-hero-title em{font-style:italic;color:var(--acc);}
+.lb-hero-sub{color:var(--muted);font-size:0.9rem;line-height:1.8;max-width:400px;font-weight:300;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem;}
+
+/* Editorial grid */
+.lb-section{padding:80px 48px;max-width:1400px;margin:0 auto;}
+.lb-section-label{font-size:0.68rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--acc);margin-bottom:40px;display:flex;align-items:center;gap:12px;}
+.lb-section-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent);}
+
+/* Masonry-style editorial layout */
+.lb-editorial{display:grid;gap:3px;margin-bottom:3px;}
+.lb-row-1{grid-template-columns:2fr 1fr;}
+.lb-row-2{grid-template-columns:1fr 1fr 1fr;}
+.lb-row-3{grid-template-columns:1fr 2fr;}
+.lb-row-4{grid-template-columns:1fr 1fr;}
+
+.lb-card{
+  position:relative;overflow:hidden;
+  background:var(--bg3);cursor:pointer;
+  transition:transform 0.5s cubic-bezier(0.23,1,0.32,1);
+}
+.lb-card:hover{transform:scale(1.01);}
+.lb-card canvas{width:100%;height:100%;display:block;}
+.lb-card-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(12,12,12,0.85) 0%,transparent 50%);
+  transition:opacity 0.35s;
+}
+.lb-card:hover .lb-card-overlay{opacity:0.6;}
+.lb-card-info{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:24px;z-index:2;
+  transform:translateY(8px);
+  transition:transform 0.35s;
+}
+.lb-card:hover .lb-card-info{transform:translateY(0);}
+.lb-card-season{font-size:0.62rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--acc);margin-bottom:6px;}
+.lb-card-name{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;margin-bottom:4px;}
+.lb-card-desc{font-size:0.75rem;color:var(--muted);line-height:1.5;font-style:italic;}
+.lb-card-tag{
+  position:absolute;top:16px;left:16px;
+  font-size:0.6rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+  padding:4px 12px;border-radius:2px;
+  background:var(--acc);color:#0c0c0c;
+}
+.lb-card-shop{
+  position:absolute;bottom:24px;right:24px;z-index:2;
+  background:var(--acc);color:#0c0c0c;border:none;
+  padding:8px 18px;border-radius:3px;
+  font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+  cursor:pointer;font-family:'Archivo',sans-serif;
+  opacity:0;transform:translateY(8px);
+  transition:all 0.3s;
+}
+.lb-card:hover .lb-card-shop{opacity:1;transform:translateY(0);}
+
+/* Tall card heights */
+.lb-card-tall{min-height:560px;}
+.lb-card-med{min-height:380px;}
+.lb-card-short{min-height:300px;}
+
+/* Pull quote */
+.lb-quote{
+  padding:80px 48px;text-align:center;
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  background:var(--bg2);
+  margin:0;
+}
+.lb-quote-mark{
+  font-family:'Cormorant Garamond',serif;
+  font-size:6rem;color:var(--acc);line-height:0.5;
+  margin-bottom:20px;opacity:0.4;
+}
+.lb-quote-text{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(1.6rem,3.5vw,2.6rem);
+  font-style:italic;font-weight:300;
+  color:var(--w);line-height:1.5;
+  max-width:700px;margin:0 auto 20px;
+}
+.lb-quote-attr{
+  font-size:0.72rem;letter-spacing:0.15em;text-transform:uppercase;
+  color:var(--muted);font-weight:600;
+}
+
+/* Details strip */
+.lb-details{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1px;background:var(--border);
+  margin:0;
+}
+.lb-detail{
+  background:var(--bg2);padding:48px;
+  display:flex;flex-direction:column;gap:12px;
+}
+.lb-detail-num{
+  font-family:'Cormorant Garamond',serif;
+  font-size:3.5rem;color:var(--acc);font-weight:600;line-height:1;
+}
+.lb-detail-label{font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);font-weight:600;}
+.lb-detail-desc{font-size:0.85rem;color:var(--muted);line-height:1.6;font-weight:300;}
+
+/* CTA block */
+.lb-cta{
+  padding:100px 48px;text-align:center;
+  background:var(--bg3);
+  border-top:1px solid var(--border);
+}
+.lb-cta-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,5vw,4rem);font-weight:600;margin-bottom:16px;letter-spacing:-0.01em;}
+.lb-cta-title em{font-style:italic;color:var(--acc);}
+.lb-cta-sub{color:var(--muted);font-size:0.9rem;margin-bottom:36px;font-weight:300;}
+.lb-cta-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+
+/* ── CART SIDEBAR ── */
+.cart-overlay{position:fixed;inset:0;z-index:400;background:rgba(12,12,12,0.7);backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity 0.35s;}
+.cart-overlay.open{opacity:1;pointer-events:all;}
+.cart-sidebar{position:fixed;right:0;top:0;bottom:0;width:440px;background:var(--bg2);border-left:1px solid var(--border2);z-index:401;display:flex;flex-direction:column;transform:translateX(100%);transition:transform 0.4s cubic-bezier(0.23,1,0.32,1);}
+.cart-overlay.open .cart-sidebar{transform:translateX(0);}
+.cart-header{padding:28px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.cart-header-title{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:600;letter-spacing:0.02em;}
+.cart-close{background:var(--surface);border:1px solid var(--border);color:var(--muted);width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;transition:all 0.2s;}
+.cart-close:hover{background:var(--glass2);color:var(--w);}
+.cart-items{flex:1;overflow-y:auto;padding:24px 32px;}
+.cart-empty{text-align:center;padding:60px 20px;color:var(--muted);}
+.cart-empty-icon{font-size:3rem;margin-bottom:16px;opacity:0.4;}
+.cart-empty p{font-size:0.85rem;line-height:1.6;}
+.cart-item{display:flex;gap:16px;padding:20px 0;border-bottom:1px solid var(--border);}
+.cart-item:last-child{border-bottom:none;}
+.cart-item-img{width:80px;height:90px;border-radius:6px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:2.2rem;flex-shrink:0;}
+.cart-item-info{flex:1;}
+.cart-item-label{font-size:0.62rem;color:var(--acc);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;}
+.cart-item-name{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:600;margin-bottom:4px;}
+.cart-item-size{font-size:0.72rem;color:var(--muted);margin-bottom:10px;}
+.cart-item-qty{display:flex;align-items:center;gap:12px;}
+.qty-btn{width:26px;height:26px;border-radius:50%;background:var(--surface);border:1px solid var(--border);color:var(--w);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.9rem;transition:all 0.2s;}
+.qty-btn:hover{background:var(--acc);border-color:var(--acc);color:#0c0c0c;}
+.qty-val{font-size:0.85rem;font-weight:600;min-width:20px;text-align:center;}
+.cart-item-remove{font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;cursor:pointer;margin-top:4px;transition:color 0.2s;}
+.cart-item-remove:hover{color:var(--red);}
+.cart-footer{padding:24px 32px;border-top:1px solid var(--border);background:var(--bg2);}
+.cart-subtotal{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:0.82rem;color:var(--muted);}
+.cart-total{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.cart-total-label{font-size:0.78rem;text-transform:uppercase;letter-spacing:0.08em;font-weight:600;}
+.cart-total-val{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:700;color:var(--acc);}
+.cart-note{font-size:0.68rem;color:var(--muted);margin-bottom:12px;line-height:1.5;}
+.support-contact{font-size:0.72rem;color:var(--acc);margin-bottom:16px;line-height:1.4;font-family:'Archivo',sans-serif;}
+.support-contact a{color:var(--acc);text-decoration:underline;transition:color 0.2s, transform 0.2s;}
+.support-contact a:hover{color:var(--w2);text-decoration:none;transform:translateX(2px);}
+.cart-checkout-btn{width:100%;background:linear-gradient(135deg,var(--acc),var(--acc3));color:#0c0c0c;border:none;padding:16px;border-radius:4px;font-family:'Archivo',sans-serif;font-weight:700;font-size:0.85rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;transition:all 0.25s;display:flex;align-items:center;justify-content:center;gap:10px;}
+.cart-checkout-btn:hover{transform:translateY(-1px);box-shadow:0 12px 32px var(--acc-glow);}
+.cart-checkout-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none; }
+.cart-continue{text-align:center;margin-top:12px;font-size:0.72rem;color:var(--muted);cursor:pointer;text-transform:uppercase;letter-spacing:0.08em;transition:color 0.2s;}
+.cart-continue:hover{color:var(--acc);}
+
+/* ── AUTH ── */
+.auth-wrap{min-height:100vh;display:flex;background:var(--bg);}
+.auth-visual{flex:1;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--bg3);}
+.auth-visual-canvas{width:100%;height:100%;position:absolute;inset:0;}
+.auth-visual-text{position:relative;z-index:2;text-align:center;padding:40px;}
+.auth-visual-logo{font-family:'Cormorant Garamond',serif;font-size:5rem;font-weight:700;letter-spacing:0.15em;background:linear-gradient(135deg,var(--acc2),var(--acc));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px;}
+.auth-visual-tagline{color:var(--muted);font-size:0.88rem;font-weight:300;line-height:1.8;max-width:260px;margin:0 auto;font-style:italic;font-family:'Cormorant Garamond',serif;}
+.auth-panel{width:480px;display:flex;align-items:center;justify-content:center;padding:48px;background:var(--bg2);border-left:1px solid var(--border);}
+.auth-box{width:100%;max-width:360px;}
+.auth-tabs{display:flex;gap:0;margin-bottom:40px;border-bottom:1px solid var(--border);}
+.auth-tab{flex:1;padding:12px;font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;text-align:center;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:all 0.25s;}
+.auth-tab.on{color:var(--acc);border-bottom-color:var(--acc);}
+.auth-form-block{display:none;}
+.auth-form-block.on{display:block;}
+.auth-headline{font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:600;line-height:1.1;margin-bottom:8px;}
+.auth-sub{color:var(--muted);font-size:0.82rem;margin-bottom:30px;font-weight:300;line-height:1.6;}
+.f{margin-bottom:18px;}
+.f label{display:block;font-size:0.68rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--dim);margin-bottom:8px;}
+.f input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--w);padding:13px 16px;border-radius:4px;font-family:'Archivo',sans-serif;font-size:0.88rem;outline:none;transition:border-color 0.2s;}
+.f input:focus{border-color:var(--acc);}
+.f input::placeholder{color:var(--muted);}
+.auth-submit{width:100%;background:linear-gradient(135deg,var(--acc),var(--acc3));color:#0c0c0c;border:none;padding:14px;border-radius:4px;font-family:'Archivo',sans-serif;font-weight:700;font-size:0.82rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;transition:all 0.25s;margin-bottom:20px;}
+.auth-submit:hover{box-shadow:0 8px 24px var(--acc-glow);transform:translateY(-1px);}
+.auth-divider{text-align:center;color:var(--muted);font-size:0.72rem;margin:0 0 20px;position:relative;}
+.auth-divider::before,.auth-divider::after{content:'';position:absolute;top:50%;width:38%;height:1px;background:var(--border);}
+.auth-divider::before{left:0;}
+.auth-divider::after{right:0;}
+.google-wrap{display:flex;justify-content:center;}
+
+/* ── PAY MODAL ── */
+.pay-modal-bg{position:fixed;inset:0;z-index:600;background:rgba(12,12,12,0.9);backdrop-filter:blur(16px);display:none;align-items:center;justify-content:center;}
+.pay-modal-bg.open{display:flex;}
+.pay-modal{background:var(--bg2);border:1px solid rgba(200,169,110,0.2);border-radius:var(--r2);padding:48px 44px;width:460px;text-align:center;animation:popUp 0.4s cubic-bezier(0.34,1.56,0.64,1);position:relative;}
+@keyframes popUp{from{transform:scale(0.85) translateY(20px);opacity:0;}to{transform:scale(1) translateY(0);opacity:1;}}
+.pay-modal-icon{font-size:3.5rem;margin-bottom:20px;}
+.pay-modal-title{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:600;color:var(--acc);margin-bottom:10px;letter-spacing:0.02em;}
+.pay-modal-sub{color:var(--muted);font-size:0.88rem;line-height:1.7;margin-bottom:8px;}
+.pay-modal-ref{font-size:0.72rem;color:var(--dim);margin-bottom:28px;font-style:italic;}
+.pay-modal-divider{width:60px;height:1px;background:var(--acc);margin:20px auto;opacity:0.4;}
+.pay-modal-close{background:linear-gradient(135deg,var(--acc),var(--acc3));color:#0c0c0c;border:none;padding:13px 36px;border-radius:4px;font-family:'Archivo',sans-serif;font-weight:700;font-size:0.8rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;transition:all 0.25s;}
+.pay-modal-close:hover{box-shadow:0 8px 24px var(--acc-glow);}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:28px;right:28px;z-index:999;background:rgba(12,12,12,0.96);border:1px solid var(--border2);border-radius:8px;padding:14px 22px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(20px);transform:translateY(80px);opacity:0;transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1);max-width:320px;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast-bar{width:3px;height:36px;border-radius:2px;flex-shrink:0;}
+.toast-text{font-size:0.82rem;line-height:1.5;}
+.toast-text strong{display:block;font-size:0.88rem;margin-bottom:2px;}
+
+.ambient{position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 50% 60% at 85% 30%,rgba(200,169,110,0.04),transparent),radial-gradient(ellipse 40% 50% at 15% 70%,rgba(139,105,20,0.04),transparent);}
+
+@media(max-width:900px){
+  .nav{padding:16px 20px;}
+  .nav-links{display:none;}
+  .hero-content{left:20px;right:20px;}
+  .cart-sidebar{width:100%;}
+  .section,.lb-section{padding:60px 20px;}
+  .auth-visual{display:none;}
+  .auth-panel{width:100%;}
+  .lb-row-1,.lb-row-2,.lb-row-3,.lb-row-4{grid-template-columns:1fr;}
+  .lb-details{grid-template-columns:1fr;}
+  .lb-hero-content{padding:0 20px 60px;}
+}
+</style>
+</head>
+<body>
+<div class="ambient"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo" onclick="goPage('home')">RUX</div>
+  <div class="nav-links">
+    <a id="nl-collection" onclick="scrollToShop()">Collection</a>
+    <a id="nl-lookbook"   onclick="goPage('lookbook')">Lookbook</a>
+    <a id="nl-account"   onclick="goPage('auth')">Account</a>
+  </div>
+  <div class="nav-right">
+    <div class="cart-btn" onclick="openCart()">Bag <div class="cart-count" id="cartCount">0</div></div>
+    <button class="nav-auth-btn" id="navAuthBtn" onclick="goPage('auth')">Sign In</button>
+    <div class="nav-avatar" id="navAvatar"></div>
+  </div>
+</nav>
+
+<!-- ══════════ HOME ══════════ -->
+<div class="page active" id="page-home">
+  <section class="hero">
+    <canvas id="scene-canvas"></canvas>
+    <div class="hero-overlay-left"></div>
+    <div class="hero-overlay-bottom"></div>
+    <div class="hero-content">
+      <div class="hero-season">SS 2026 · Lagos</div>
+      <h1 class="hero-title">Wear the<br><em>Future</em><br>Now</h1>
+      <p class="hero-sub">Architectural silhouettes crafted for those who move through the world on their own terms. Limited drops. Permanent statements.</p>
+      <div class="hero-actions">
+        <button class="btn btn-gold" onclick="scrollToShop()">Shop Collection</button>
+        <button class="btn btn-ghost" onclick="goPage('lookbook')">View Lookbook</button>
+      </div>
+    </div>
+    <div class="scene-hint"><div class="hint-icon">↻</div>Drag to rotate</div>
+  </section>
+
+  <div class="lookbook-strip"><div class="lookbook-ticker" id="ticker"></div></div>
+
+  <div class="section" id="shopSection">
+    <div class="sec-head">
+      <div class="sec-title">The <span>Collection</span></div>
+      <div class="sec-filters">
+        <div class="filter-pill on" onclick="setFilter(this,'all')">All</div>
+        <div class="filter-pill" onclick="setFilter(this,'tops')">Tops</div>
+        <div class="filter-pill" onclick="setFilter(this,'bottoms')">Bottoms</div>
+        <div class="filter-pill" onclick="setFilter(this,'outerwear')">Outerwear</div>
+        <div class="filter-pill" onclick="setFilter(this,'accessories')">Accessories</div>
+      </div>
+    </div>
+    <div class="prod-grid" id="prodGrid"></div>
+  </div>
+</div>
+
+<!-- ══════════ LOOKBOOK ══════════ -->
+<div class="page" id="page-lookbook">
+
+  <!-- Full-bleed hero -->
+  <section class="lb-hero">
+    <canvas class="lb-hero-canvas" id="lb-hero-canvas"></canvas>
+    <div class="lb-hero-grad"></div>
+    <div class="lb-hero-content">
+      <div class="lb-tag">SS 2026 · Editorial</div>
+      <h1 class="lb-hero-title">Between<br>Fabric &amp;<br><em>Form</em></h1>
+      <p class="lb-hero-sub">"Garments that negotiate between the body and the world around it."</p>
+    </div>
+  </section>
+
+  <!-- Chapter 1 -->
+  <div class="lb-section">
+    <div class="lb-section-label">Chapter 01 — Structure</div>
+    <div class="lb-editorial lb-row-1" style="margin-bottom:3px;">
+      <div class="lb-card lb-card-tall" id="lbc-1">
+        <canvas width="100%" height="100%" style="width:100%;height:100%;display:block;"></canvas>
+        <div class="lb-card-tag">Hero Piece</div>
+        <div class="lb-card-overlay"></div>
+        <div class="lb-card-info">
+          <div class="lb-card-season">Outerwear · SS26</div>
+          <div class="lb-card-name">Void Overcoat</div>
+          <div class="lb-card-desc">Double-faced wool, raw hem, architectural silhouette</div>
+        </div>
+        <button class="lb-card-shop" onclick="addToCart(1);event.stopPropagation()">Add to Bag</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px;">
+        <div class="lb-card lb-card-med" id="lbc-2">
+          <canvas width="100%" height="100%" style="width:100%;height:100%;display:block;"></canvas>
+          <div class="lb-card-overlay"></div>
+          <div class="lb-card-info">
+            <div class="lb-card-season">Tops · SS26</div>
+            <div class="lb-card-name">Haze Boxy Shirt</div>
+            <div class="lb-card-desc">Crinkled cotton poplin, extended hem</div>
+          </div>
+          <button class="lb-card-shop" onclick="addToCart(3);event.stopPropagation()">Add to Bag</button>
+        </div>
+        <div class="lb-card lb-card-med" id="lbc-3">
+          <canvas width="100%" height="100%" style="width:100%;height:100%;display:block;"></canvas>
+          <div class="lb-card-overlay"></div>
+          <div class="lb-card-info">
+            <div class="lb-card-season">Accessories · SS26</div>
+            <div class="lb-card-name">Signal Bucket Hat</div>
+            <div class="lb-card-desc">6-panel nylon, tonal embroidery</div>
+          </div>
+          <button class="lb-card-shop" onclick="addToCart(7);event.stopPropagation()">Add to Bag</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pull quote -->
+  <div class="lb-quote">
+    <div class="lb-quote-mark">"</div>
+    <div class="lb-quote-text">Clothing is not decoration. It is architecture for the living body.</div>
+    <div class="lb-quote-attr">— RUX Design Manifesto, SS 2026</div>
+  </div>
+
+  <!-- Chapter 2 -->
+  <div class="lb-section">
+    <div class="lb-section-label">Chapter 02 — Movement</div>
+    <div class="lb-editorial lb-row-2" style="margin-bottom:3px;">
+      <div class="lb-card lb-card-tall" id="lbc-4">
+        <canvas width="100%" height="100%" style="width:100%;height:100%;display:block;"></canvas>
+        <div class="lb-card-overlay"></div>
+        <div class="lb-card-info">
+          <div class="lb-card-season">Bottoms · SS26</div>
+          <div class="lb-card-name">Drift Wide Trouser</div>
+          <div class="lb-card-desc">Selvedge denim, dropped crotch, raw cuff</div>
+        </div>
+        <button class="lb-card-shop" onclick="addToCart(2);event.stopPropagation()">Add to Bag</button>
+      </div>
+      <div class="lb-card lb-card-tall" id="lbc-5">
+        <canvas width="100%" height="100%" style="width:100%;height:100%;display:block;"></canvas>
+        <div class="lb-card-tag">Limited</div>
+        <div class="lb-card-overlay"></div>
+        <div class="lb-card-info">
+          <div class="lb-card-season">Tops · SS26</div>
+          <div class="lb-card-name">Arc Knit Vest</div>
+          <div class="lb-card-desc">Merino wool, open-knit construction</div>
+        </div>
+        <button class="lb-card-shop" onclick="addToCart(4);event.stopPropagation()">Add to Bag</button>
+      </div>
+      <div class="lb-card lb-card-tall" id="lbc-6">
+        <canvas width="100%" height="100%" style="width:100%;height:100%;display:block;"></canvas>
+        <div class="lb-card-overlay"></div>
+        <div class="lb-card-info">
+          <div class="lb-card-season">Bottoms · SS26</div>
+          <div class="lb-card-name">Transit Cargo</div>
+          <div class="lb-card-desc">Ripstop nylon, 8 pockets, elastic cuff</div>
+        </div>
+        <button class="lb-card-shop" onclick="addToCart(5);event.stopPropagation()">Add to Bag</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Details strip -->
+  <div class="lb-details">
+    <div class="lb-detail">
+      <div class="lb-detail-num">08</div>
+      <div class="lb-detail-label">Pieces in Collection</div>
+      <div class="lb-detail-desc">Each garment designed with intention. No filler, no noise — only necessary objects.</div>
+    </div>
+    <div class="lb-detail">
+      <div class="lb-detail-num">100%</div>
+      <div class="lb-detail-label">Natural or Recycled Fibre</div>
+      <div class="lb-detail-desc">Every fabric is either organic cotton, merino wool, recycled nylon, or Japanese selvedge denim.</div>
+    </div>
+    <div class="lb-detail">
+      <div class="lb-detail-num">NG</div>
+      <div class="lb-detail-label">Designed in Lagos</div>
+      <div class="lb-detail-desc">Born from the city's energy. Delivered within Nigeria. Worn everywhere.</div>
+    </div>
+  </div>
+
+  <!-- Chapter 3 -->
+  <div class="lb-section">
+    <div class="lb-section-label">Chapter 03 — Stillness</div>
+    <div class="lb-editorial lb-row-3" style="margin-bottom:3px;">
+      <div class="lb-card lb-card-tall" id="lbc-7">
+        <canvas width="100%" height="100%" style="width:100%;height:100%;display:block;"></canvas>
+        <div class="lb-card-overlay"></div>
+        <div class="lb-card-info">
+          <div class="lb-card-season">Accessories · SS26</div>
+          <div class="lb-card-name">Phase Scarf</div>
+          <div class="lb-card-desc">130cm cashmere blend, hand-rolled edges</div>
+        </div>
+        <button class="lb-card-shop" onclick="addToCart(8);event.stopPropagation()">Add to Bag</button>
+      </div>
+      <div class="lb-card lb-card-tall" id="lbc-8">
+        <canvas width="100%" height="100%" style="width:100%;height:100%;display:block;"></canvas>
+        <div class="lb-card-tag">New</div>
+        <div class="lb-card-overlay"></div>
+        <div class="lb-card-info">
+          <div class="lb-card-season">Outerwear · SS26</div>
+          <div class="lb-card-name">Flux Puffer</div>
+          <div class="lb-card-desc">Recycled nylon, 700-fill goose down, packable</div>
+        </div>
+        <button class="lb-card-shop" onclick="addToCart(6);event.stopPropagation()">Add to Bag</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="lb-cta">
+    <div class="lb-cta-title">The Collection<br>is <em>Now Open</em></div>
+    <div class="lb-cta-sub">Limited pieces. All prices in NGN. Nigeria delivery only.</div>
+    <div class="lb-cta-btns">
+      <button class="btn btn-gold" onclick="scrollToShop();goPage('home')">Shop the Collection</button>
+      <button class="btn btn-ghost" onclick="openCart()">View Bag</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ AUTH ══════════ -->
+<div class="page" id="page-auth">
+  <div class="auth-wrap">
+    <div class="auth-visual">
+      <canvas class="auth-visual-canvas" id="auth-canvas"></canvas>
+      <div class="auth-visual-text">
+        <div class="auth-visual-logo">RUX</div>
+        <div class="auth-visual-tagline">"Wear less. Say more. Move always."</div>
+      </div>
+    </div>
+    <div class="auth-panel">
+      <div class="auth-box">
+        <div class="auth-tabs">
+          <div class="auth-tab on" onclick="switchTab('login')">Sign In</div>
+          <div class="auth-tab" onclick="switchTab('signup')">Create Account</div>
+        </div>
+        <div class="auth-form-block on" id="form-login">
+          <div class="auth-headline">Welcome<br>Back.</div>
+          <div class="auth-sub">Sign in to access your orders, wishlist, and exclusive drops.</div>
+          <div class="f"><label>Email</label><input type="email" placeholder="you@example.com" id="loginEmail"></div>
+          <div class="f"><label>Password</label><input type="password" placeholder="••••••••" id="loginPass"></div>
+          <button class="auth-submit" onclick="doLogin()">Sign In</button>
+          <div class="auth-divider">or</div>
+          <div class="google-wrap">
+            <div id="g_id_onload" data-client_id="712385176184-d3bivc48gpuv93b58d6mm85l1sgckonv.apps.googleusercontent.com" data-callback="handleGoogleLogin" data-auto_prompt="false"></div>
+            <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="filled_black" data-text="signin_with" data-size="large" data-width="320"></div>
+          </div>
+        </div>
+        <div class="auth-form-block" id="form-signup">
+          <div class="auth-headline">Join<br>RUX.</div>
+          <div class="auth-sub">Create your account for early access to new drops.</div>
+          <div class="f"><label>Full Name</label><input type="text" placeholder="Ada Okonkwo" id="signupName"></div>
+          <div class="f"><label>Email</label><input type="email" placeholder="you@example.com" id="signupEmail"></div>
+          <div class="f"><label>Password</label><input type="password" placeholder="Min 8 characters" id="signupPass"></div>
+          <button class="auth-submit" onclick="doSignup()">Create Account</button>
+          <div class="auth-divider">or</div>
+          <div class="google-wrap">
+            <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="filled_black" data-text="signup_with" data-size="large" data-width="320"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CART -->
+<div class="cart-overlay" id="cartOverlay" onclick="closeCartOnBg(event)">
+  <div class="cart-sidebar">
+    <div class="cart-header">
+      <div class="cart-header-title">Your Bag</div>
+      <div class="cart-close" onclick="closeCart()">✕</div>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-footer">
+      <div class="cart-subtotal"><span>Subtotal</span><span id="cartSubtotal">₦0.00</span></div>
+      <div class="cart-subtotal"><span>Shipping</span><span style="color:var(--acc2)">Calculated at checkout</span></div>
+      <div class="cart-total"><span class="cart-total-label">Total</span><span class="cart-total-val" id="cartTotal">₦0.00</span></div>
+      <div class="cart-note">🇳🇬 Delivery within Nigeria only · Prices in NGN</div>
+      <div class="support-contact"><a href="https://wa.me/234703897613?text=Hello,%20I%20need%20help%20with%20my%20order%20on%20your%20website." target="_blank" rel="noopener noreferrer">If you need any help, contact support</a></div>
+      <button class="cart-checkout-btn" id="checkoutBtn" onclick="initiatePaystack()"><span>Pay with Paystack</span><span>→</span></button>
+      <div class="cart-continue" onclick="closeCart()">Continue Shopping</div>
+    </div>
+  </div>
+</div>
+
+<!-- PAY MODAL -->
+<div class="pay-modal-bg" id="payModal">
+  <div class="pay-modal">
+    <div class="pay-modal-icon">✦</div>
+    <div class="pay-modal-title">Order Confirmed</div>
+    <div class="pay-modal-divider"></div>
+    <div class="pay-modal-sub" id="payModalMsg">Your payment was successful.</div>
+    <div class="pay-modal-ref" id="payModalRef"></div>
+    <button class="pay-modal-close" onclick="closePayModal()">Continue Shopping</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"><div class="toast-bar" id="toastBar"></div><div class="toast-text" id="toastText"></div></div>
+
+<script>
+// ═══════════════════════════════════════════
+// PAYSTACK
+// ═══════════════════════════════════════════
+const PAYSTACK_PUBLIC_KEY = 'pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let state = { user:null, cart:[], filter:'all' };
+
+// ═══════════════════════════════════════════
+// PRODUCTS
+// ═══════════════════════════════════════════
+const PRODUCTS = [
+  {id:1,name:'Void Overcoat',cat:'outerwear',price:185000,badge:'ltd',emoji:'🥼',desc:'Double-faced wool, raw hem detail, architectural cut.',colors:['#1a1a1a','#2c2c2c','#8b6914'],sizes:['S','M','L','XL']},
+  {id:2,name:'Drift Wide Trouser',cat:'bottoms',price:72000,badge:'new',emoji:'👖',desc:'Japanese selvedge denim, dropped crotch, raw cuff.',colors:['#2c2c2c','#4a3728','#1a1a1a'],sizes:['28','30','32','34']},
+  {id:3,name:'Haze Boxy Shirt',cat:'tops',price:54000,badge:'',emoji:'👕',desc:'Crinkled cotton poplin, extended hem, single chest pocket.',colors:['#f5f0eb','#c8a96e','#2c2c2c'],sizes:['S','M','L','XL','XXL']},
+  {id:4,name:'Arc Knit Vest',cat:'tops',price:46000,badge:'sale',emoji:'🦺',desc:'Merino wool blend, open-knit construction, elongated body.',colors:['#8b6914','#f5f0eb','#1a1a1a'],sizes:['S','M','L']},
+  {id:5,name:'Transit Cargo',cat:'bottoms',price:68000,badge:'',emoji:'🩳',desc:'Ripstop nylon, 8 pockets, elastic waist and ankle.',colors:['#4a3728','#1a1a1a','#2c4a2c'],sizes:['S','M','L','XL']},
+  {id:6,name:'Flux Puffer',cat:'outerwear',price:142000,badge:'new',emoji:'🧥',desc:'Recycled nylon shell, 700-fill goose down, packable.',colors:['#1a1a1a','#2c2c2c','#c8a96e'],sizes:['S','M','L','XL']},
+  {id:7,name:'Signal Bucket Hat',cat:'accessories',price:28000,badge:'',emoji:'🪣',desc:'6-panel nylon, tonal embroidery, structured brim.',colors:['#1a1a1a','#f5f0eb','#8b6914'],sizes:['One Size']},
+  {id:8,name:'Phase Scarf',cat:'accessories',price:32000,badge:'ltd',emoji:'🧣',desc:'130cm × 130cm cashmere blend, hand-rolled edges.',colors:['#c8a96e','#f5f0eb','#2c2c2c'],sizes:['One Size']},
+];
+
+// ═══════════════════════════════════════════
+// 3D SCENES
+// ═══════════════════════════════════════════
+function initMainScene() {
+  const canvas = document.getElementById('scene-canvas');
+  const gl = canvas.getContext('webgl')||canvas.getContext('experimental-webgl');
+  function resize(){canvas.width=canvas.offsetWidth;canvas.height=canvas.offsetHeight;if(gl)gl.viewport(0,0,canvas.width,canvas.height);}
+  resize(); window.addEventListener('resize',resize);
+  if(!gl){renderFallback(canvas);return;}
+  const vs=`attribute vec2 a_position;void main(){gl_Position=vec4(a_position,0.0,1.0);}`;
+  const fs=`precision mediump float;
+  uniform vec2 u_res;uniform float u_time;uniform vec2 u_mouse;
+  vec3 mod289(vec3 x){return x-floor(x*(1./289.))*289.;}
+  vec2 mod289(vec2 x){return x-floor(x*(1./289.))*289.;}
+  vec3 permute(vec3 x){return mod289(((x*34.)+1.)*x);}
+  float snoise(vec2 v){const vec4 C=vec4(.211324865405187,.366025403784439,-.577350269189626,.024390243902439);
+  vec2 i=floor(v+dot(v,C.yy));vec2 x0=v-i+dot(i,C.xx);
+  vec2 i1=(x0.x>x0.y)?vec2(1.,0.):vec2(0.,1.);
+  vec4 x12=x0.xyxy+C.xxzz;x12.xy-=i1;i=mod289(i);
+  vec3 p=permute(permute(i.y+vec3(0.,i1.y,1.))+i.x+vec3(0.,i1.x,1.));
+  vec3 m=max(.5-vec3(dot(x0,x0),dot(x12.xy,x12.xy),dot(x12.zw,x12.zw)),0.);
+  m=m*m;m=m*m;vec3 x=2.*fract(p*C.www)-1.;vec3 h=abs(x)-.5;vec3 ox=floor(x+.5);
+  vec3 a0=x-ox;m*=1.79284291400159-.85373472095314*(a0*a0+h*h);
+  vec3 g;g.x=a0.x*x0.x+h.x*x0.y;g.yz=a0.yz*x12.xz+h.yz*x12.yw;return 130.*dot(m,g);}
+  void main(){
+  vec2 uv=gl_FragCoord.xy/u_res;
+  vec2 asp=vec2(u_res.x/u_res.y,1.0);
+  vec2 p=(uv-.5)*asp*2.0;
+  vec2 mouse=(u_mouse/u_res-.5)*asp*2.0;
+  float md=length(p-mouse);float mi=smoothstep(.8,0.,md)*.3;
+  float t=u_time*.25;
+  float n1=snoise(p*2.+vec2(t*.5,t*.3)+mouse*.2);
+  float n2=snoise(p*4.+vec2(-t*.4,t*.6));
+  float n3=snoise(p*8.+vec2(t*.7,-t*.5));
+  float cloth=n1*.6+n2*.25+n3*.15+mi;
+  vec3 normal=normalize(vec3(dFdx(cloth)*8.,dFdy(cloth)*8.,1.));
+  vec3 ld=normalize(vec3(.5,.8,1.));
+  float diff=max(dot(normal,ld),0.);
+  vec3 hv=normalize(ld+vec3(0,0,1));
+  float spec=pow(max(dot(normal,hv),0.),32.);
+  vec3 base=mix(vec3(.05,.05,.06),vec3(.12,.10,.07),uv.y);
+  vec3 gold=vec3(.78,.66,.43);
+  vec3 color=base+gold*spec*.4*diff;
+  float wu=sin(uv.x*240.)*.5+.5;float wv=sin(uv.y*240.)*.5+.5;
+  color+=wu*wv*.014*diff;
+  float vig=1.-smoothstep(.4,1.2,length((uv-.5)*vec2(1.,1.6)));
+  color*=vig;
+  float fog=smoothstep(.2,1.,uv.x);color=mix(color,vec3(.04,.04,.04),fog*.6);
+  gl_FragColor=vec4(color,1.);}`;
+  function mkShader(t,s){const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh;}
+  const prog=gl.createProgram();
+  gl.attachShader(prog,mkShader(gl.VERTEX_SHADER,vs));
+  gl.attachShader(prog,mkShader(gl.FRAGMENT_SHADER,fs));
+  gl.linkProgram(prog);gl.useProgram(prog);
+  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  const pl=gl.getAttribLocation(prog,'a_position');
+  gl.enableVertexAttribArray(pl);gl.vertexAttribPointer(pl,2,gl.FLOAT,false,0,0);
+  const uR=gl.getUniformLocation(prog,'u_res');
+  const uT=gl.getUniformLocation(prog,'u_time');
+  const uM=gl.getUniformLocation(prog,'u_mouse');
+  let mouse={x:canvas.width/2,y:canvas.height/2};
+  canvas.addEventListener('mousemove',e=>{const r=canvas.getBoundingClientRect();mouse.x=e.clientX-r.left;mouse.y=canvas.height-(e.clientY-r.top);});
+  const st=performance.now();
+  function loop(now){resize();const t=(now-st)*.001;gl.uniform2f(uR,canvas.width,canvas.height);gl.uniform1f(uT,t);gl.uniform2f(uM,mouse.x,mouse.y);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(loop);}
+  requestAnimationFrame(loop);
+}
+
+function renderFallback(canvas){
+  const ctx=canvas.getContext('2d');let t=0;
+  function draw(){canvas.width=canvas.offsetWidth;canvas.height=canvas.offsetHeight;const W=canvas.width,H=canvas.height;ctx.fillStyle='#0c0c0c';ctx.fillRect(0,0,W,H);for(let i=0;i<20;i++){const y=(i/20)*H+Math.sin(t*.5+i*.4)*30;ctx.strokeStyle=`rgba(200,169,110,${0.03+0.02*Math.sin(t+i)})`;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,y);for(let x=0;x<=W;x+=10)ctx.lineTo(x,y+Math.sin(x*.02+t*.3+i)*20);ctx.stroke();}t+=.02;requestAnimationFrame(draw);}draw();
+}
+
+// Lookbook hero scene — dramatic diagonal fabric ripple
+function initLookbookHero() {
+  const canvas = document.getElementById('lb-hero-canvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let t=0;
+  function draw(){
+    canvas.width=canvas.offsetWidth||window.innerWidth;
+    canvas.height=canvas.offsetHeight||window.innerHeight;
+    const W=canvas.width,H=canvas.height;
+    // Dark gradient base
+    const g=ctx.createLinearGradient(0,0,W,H);
+    g.addColorStop(0,'#0a0a0a');g.addColorStop(0.5,'#141008');g.addColorStop(1,'#0c0c0c');
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    // Diagonal fabric threads
+    for(let i=0;i<30;i++){
+      const offset=((i/30)*W*2 + t*30) % (W*2) - W;
+      const alpha=0.06+0.04*Math.sin(t*0.4+i*0.3);
+      ctx.strokeStyle=`rgba(200,169,110,${alpha})`;
+      ctx.lineWidth=0.8;
+      ctx.beginPath();
+      ctx.moveTo(offset-H,0);
+      for(let y=0;y<H;y+=6){
+        const wave=Math.sin(y*0.015+t*0.5+i*0.2)*25;
+        ctx.lineTo(offset+y+wave,y);
+      }
+      ctx.stroke();
+    }
+    // Gold orb glow bottom-left
+    const radG=ctx.createRadialGradient(W*0.15,H*0.85,0,W*0.15,H*0.85,H*0.5);
+    radG.addColorStop(0,'rgba(200,169,110,0.08)');radG.addColorStop(1,'transparent');
+    ctx.fillStyle=radG;ctx.fillRect(0,0,W,H);
+    t+=0.008;requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// Per-lookbook-card canvases — each with unique garment scene
+const LB_ITEMS = [
+  {id:'lbc-1',emoji:'🥼',color:'rgba(139,105,20,0.15)'},
+  {id:'lbc-2',emoji:'👕',color:'rgba(200,169,110,0.12)'},
+  {id:'lbc-3',emoji:'🪣',color:'rgba(100,100,100,0.15)'},
+  {id:'lbc-4',emoji:'👖',color:'rgba(74,55,40,0.2)'},
+  {id:'lbc-5',emoji:'🦺',color:'rgba(139,105,20,0.15)'},
+  {id:'lbc-6',emoji:'🩳',color:'rgba(44,76,44,0.15)'},
+  {id:'lbc-7',emoji:'🧣',color:'rgba(200,169,110,0.12)'},
+  {id:'lbc-8',emoji:'🧥',color:'rgba(30,30,30,0.2)'},
+];
+
+function initLookbookCards() {
+  LB_ITEMS.forEach((item, idx) => {
+    const card = document.getElementById(item.id);
+    if (!card) return;
+    const canvas = card.querySelector('canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let t = idx * 1.3; // stagger start times
+    function draw(){
+      canvas.width  = card.offsetWidth  || 400;
+      canvas.height = card.offsetHeight || 560;
+      const W=canvas.width,H=canvas.height;
+      // Deep base
+      ctx.fillStyle='#0f0e0c';ctx.fillRect(0,0,W,H);
+      // Textured background weave
+      for(let r=0;r<H;r+=4){
+        const alpha=0.025+0.01*Math.sin(r*0.08+t*0.2);
+        ctx.fillStyle=`rgba(200,169,110,${alpha})`;
+        ctx.fillRect(0,r,W,1);
+      }
+      // Vertical grain
+      for(let c=0;c<W;c+=6){
+        const alpha=0.015+0.008*Math.sin(c*0.1+t*0.15);
+        ctx.fillStyle=`rgba(245,240,235,${alpha})`;
+        ctx.fillRect(c,0,1,H);
+      }
+      // Ambient glow
+      const grd=ctx.createRadialGradient(W/2,H*0.45,0,W/2,H*0.45,W*0.6);
+      grd.addColorStop(0,item.color);grd.addColorStop(1,'transparent');
+      ctx.fillStyle=grd;ctx.fillRect(0,0,W,H);
+      // Orbit rings
+      const cx=W/2,cy=H*0.42;
+      [60,90,120].forEach((r,ri)=>{
+        const a=0.06+0.03*Math.sin(t*0.5+ri);
+        ctx.strokeStyle=`rgba(200,169,110,${a})`;
+        ctx.lineWidth=0.6;
+        ctx.beginPath();ctx.ellipse(cx,cy,r*1.4,r*0.5,0,0,Math.PI*2);ctx.stroke();
+      });
+      // Floating garment
+      const float=Math.sin(t*0.9+idx)*10;
+      const scale=1+Math.sin(t*0.7)*0.03;
+      ctx.save();ctx.translate(cx,cy+float);ctx.scale(scale,scale);
+      ctx.font=`${Math.min(W,H)*0.22}px serif`;
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillStyle='rgba(0,0,0,0.35)';ctx.fillText(item.emoji,4,8);
+      ctx.fillStyle='#fff';ctx.fillText(item.emoji,0,0);
+      ctx.restore();
+      // Sheen sweep
+      const phase=(Math.sin(t*0.4+idx)*0.5+0.5);
+      const sg=ctx.createLinearGradient(0,0,W,H);
+      sg.addColorStop(0,'transparent');
+      sg.addColorStop(Math.max(0,phase-.08),'transparent');
+      sg.addColorStop(phase,'rgba(232,213,176,0.07)');
+      sg.addColorStop(Math.min(1,phase+.08),'transparent');
+      sg.addColorStop(1,'transparent');
+      ctx.fillStyle=sg;ctx.fillRect(0,0,W,H);
+      // Bottom fade
+      const bf=ctx.createLinearGradient(0,H*.5,0,H);
+      bf.addColorStop(0,'transparent');bf.addColorStop(1,'rgba(12,12,12,0.7)');
+      ctx.fillStyle=bf;ctx.fillRect(0,0,W,H);
+      t+=0.012;requestAnimationFrame(draw);
+    }
+    draw();
+  });
+}
+
+function initAuthScene(){
+  const canvas=document.getElementById('auth-canvas');if(!canvas)return;
+  const ctx=canvas.getContext('2d');let t=0;
+  function draw(){canvas.width=canvas.offsetWidth||400;canvas.height=canvas.offsetHeight||window.innerHeight;const W=canvas.width,H=canvas.height;ctx.fillStyle='#111111';ctx.fillRect(0,0,W,H);for(let i=0;i<12;i++){const x=(i/12)*W+Math.cos(t*.3+i*.5)*40;ctx.strokeStyle=`rgba(200,169,110,${.04+.02*Math.sin(t+i)})`;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,0);for(let y=0;y<=H;y+=8)ctx.lineTo(x+Math.sin(y*.015+t*.4+i)*30,y);ctx.stroke();}t+=.015;requestAnimationFrame(draw);}draw();
+}
+
+function initProductCanvas(product){
+  const canvas=document.getElementById('pc-'+product.id);if(!canvas)return;
+  const ctx=canvas.getContext('2d');let t=0;
+  function draw(){canvas.width=canvas.offsetWidth||280;canvas.height=canvas.offsetHeight||340;const W=canvas.width,H=canvas.height;ctx.fillStyle='#161616';ctx.fillRect(0,0,W,H);const cx=W/2,cy=H*.42;[20,42,64,86].forEach((r,ri)=>{ctx.strokeStyle=`rgba(200,169,110,${.04+.02*Math.sin(t*.8+r*.04)})`;ctx.lineWidth=.5;ctx.beginPath();ctx.ellipse(cx,cy,r*1.3,r*.55,0,0,Math.PI*2);ctx.stroke();});const float=Math.sin(t*1.2+product.id)*8;const sc=1+Math.sin(t*.9)*.04;ctx.save();ctx.translate(cx,cy+float);ctx.scale(sc,sc);ctx.font=`${Math.min(W,H)*.28}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='rgba(0,0,0,.4)';ctx.fillText(product.emoji,3,6);ctx.fillStyle='#fff';ctx.fillText(product.emoji,0,0);ctx.restore();const gr=ctx.createLinearGradient(0,0,W,H);const ph=(Math.sin(t*.6)*.5+.5);gr.addColorStop(0,'transparent');gr.addColorStop(Math.max(0,ph-.1),'transparent');gr.addColorStop(ph,'rgba(232,213,176,.06)');gr.addColorStop(Math.min(1,ph+.1),'transparent');gr.addColorStop(1,'transparent');ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);t+=.016;requestAnimationFrame(draw);}draw();
+}
+
+// ═══════════════════════════════════════════
+// PRODUCTS
+// ═══════════════════════════════════════════
+let curFilter='all';
+function renderProducts(){
+  const list=curFilter==='all'?PRODUCTS:PRODUCTS.filter(p=>p.cat===curFilter);
+  document.getElementById('prodGrid').innerHTML=list.map(p=>`
+    <div class="prod-card">
+      ${p.badge?`<div class="prod-badge badge-${p.badge==='sale'?'sale':p.badge==='ltd'?'ltd':'new'}">${p.badge==='ltd'?'Limited':p.badge==='sale'?'Sale':'New'}</div>`:''}
+      <div class="prod-wish" onclick="event.stopPropagation();toggleWish(this)">♡</div>
+      <div class="prod-canvas-wrap">
+        <canvas class="prod-3d-canvas" id="pc-${p.id}"></canvas>
+        <div class="prod-colors">${p.colors.map(c=>`<div class="color-dot" style="background:${c}"></div>`).join('')}</div>
+      </div>
+      <div class="prod-info">
+        <div class="prod-label">${p.cat}</div>
+        <div class="prod-name">${p.name}</div>
+        <div class="prod-desc">${p.desc}</div>
+        <div class="prod-foot">
+          <div class="prod-price">₦${fmtNum(p.price)}<small>NGN</small></div>
+          <button class="prod-add" onclick="addToCart(${p.id})">Add to Bag</button>
+        </div>
+      </div>
+    </div>`).join('');
+  setTimeout(()=>list.forEach(p=>initProductCanvas(p)),50);
+}
+
+function setFilter(el,cat){document.querySelectorAll('.filter-pill').forEach(p=>p.classList.remove('on'));el.classList.add('on');curFilter=cat;renderProducts();}
+function scrollToShop(){document.getElementById('shopSection')?.scrollIntoView({behavior:'smooth'});}
+
+// ═══════════════════════════════════════════
+// CART
+// ═══════════════════════════════════════════
+function addToCart(id){
+  const p=PRODUCTS.find(x=>x.id===id);if(!p)return;
+  const ex=state.cart.find(i=>i.id===id);
+  if(ex)ex.qty++;else state.cart.push({...p,qty:1,size:p.sizes[0]});
+  updateCartUI();showToast(`<strong>${p.name}</strong> added to bag`,'success');openCart();
+}
+function removeFromCart(id){state.cart=state.cart.filter(i=>i.id!==id);updateCartUI();}
+function changeQty(id,d){const i=state.cart.find(x=>x.id===id);if(i)i.qty=Math.max(1,i.qty+d);updateCartUI();}
+function getCartTotal(){return state.cart.reduce((s,i)=>s+i.price*i.qty,0);}
+function toggleWish(el){el.classList.toggle('wished');el.textContent=el.classList.contains('wished')?'♥':'♡';}
+
+function updateCartUI(){
+  const count=state.cart.reduce((s,i)=>s+i.qty,0);
+  document.getElementById('cartCount').textContent=count;
+  const total=getCartTotal();
+  document.getElementById('cartSubtotal').textContent='₦'+fmtNum(total);
+  document.getElementById('cartTotal').textContent='₦'+fmtNum(total);
+  document.getElementById('checkoutBtn').disabled=!state.cart.length;
+  const wrap=document.getElementById('cartItems');
+  if(!state.cart.length){wrap.innerHTML=`<div class="cart-empty"><div class="cart-empty-icon">🛍</div><p>Your bag is empty.<br>Add pieces from the collection.</p></div>`;return;}
+  wrap.innerHTML=state.cart.map(item=>`
+    <div class="cart-item">
+      <div class="cart-item-img">${item.emoji}</div>
+      <div class="cart-item-info">
+        <div class="cart-item-label">${item.cat}</div>
+        <div class="cart-item-name">${item.name}</div>
+        <div class="cart-item-size">Size: ${item.size}</div>
+        <div class="cart-item-qty">
+          <div class="qty-btn" onclick="changeQty(${item.id},-1)">−</div>
+          <div class="qty-val">${item.qty}</div>
+          <div class="qty-btn" onclick="changeQty(${item.id},1)">+</div>
+          <div class="cart-item-remove" onclick="removeFromCart(${item.id})">Remove</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;">
+        <div class="cart-item-price" style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;">₦${fmtNum(item.price*item.qty)}</div>
+      </div>
+    </div>`).join('');
+}
+
+function openCart(){document.getElementById('cartOverlay').classList.add('open');}
+function closeCart(){document.getElementById('cartOverlay').classList.remove('open');}
+function closeCartOnBg(e){if(e.target===document.getElementById('cartOverlay'))closeCart();}
+
+// ═══════════════════════════════════════════
+// PAYSTACK
+// ═══════════════════════════════════════════
+function initiatePaystack(){
+  if(!state.cart.length){showToast('Your bag is empty','error');return;}
+  if(!state.user){showToast('Please sign in to checkout','error');closeCart();goPage('auth');return;}
+  const totalNGN=getCartTotal();
+  const amountKobo=totalNGN*100;
+  const reference='RUX-'+Date.now()+'-'+Math.floor(Math.random()*9000+1000);
+  const itemSummary=state.cart.map(i=>`${i.name} ×${i.qty}`).join(', ');
+  const handler=PaystackPop.setup({
+    key:PAYSTACK_PUBLIC_KEY,
+    email:state.user.email,
+    amount:amountKobo,
+    currency:'NGN',
+    ref:reference,
+    label:'RUX Fashion',
+    metadata:{custom_fields:[
+      {display_name:'Customer',variable_name:'customer',value:state.user.name},
+      {display_name:'Items',variable_name:'items',value:itemSummary},
+    ]},
+    callback:function(response){onPaymentSuccess(response);},
+    onClose:function(){onPaymentCancelled();}
+  });
+  handler.openIframe();
+}
+
+function onPaymentSuccess(response){
+  state.cart=[];updateCartUI();closeCart();
+  document.getElementById('payModalMsg').textContent=`Your order has been placed. Your RUX pieces will be dispatched within Nigeria. Receipt sent to ${state.user.email}.`;
+  document.getElementById('payModalRef').textContent=`Transaction Ref: ${response.reference||response.trxref}`;
+  document.getElementById('payModal').classList.add('open');
+  showToast('<strong>Payment successful!</strong> Order confirmed ✦','success');
+}
+function onPaymentCancelled(){showToast('Payment cancelled. Your bag is saved.','info');}
+function closePayModal(){document.getElementById('payModal').classList.remove('open');}
+
+// ═══════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════
+function switchTab(t){
+  document.querySelectorAll('.auth-tab').forEach((el,i)=>el.classList.toggle('on',(i===0&&t==='login')||(i===1&&t==='signup')));
+  document.getElementById('form-login').classList.toggle('on',t==='login');
+  document.getElementById('form-signup').classList.toggle('on',t==='signup');
+}
+function handleGoogleLogin(response){
+  try{const payload=JSON.parse(atob(response.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));loginUser(payload.name||'RUX Member',payload.email||'');}
+  catch(e){showToast('Google sign-in error','error');}
+}
+function doLogin(){
+  const e=document.getElementById('loginEmail').value.trim();
+  const p=document.getElementById('loginPass').value;
+  if(!e){showToast('Please enter your email','error');return;}
+  if(!p){showToast('Please enter your password','error');return;}
+  loginUser(e.split('@')[0],e);
+}
+function doSignup(){
+  const n=document.getElementById('signupName').value.trim();
+  const e=document.getElementById('signupEmail').value.trim();
+  const p=document.getElementById('signupPass').value;
+  if(!n){showToast('Please enter your full name','error');return;}
+  if(!e){showToast('Please enter your email','error');return;}
+  if(!p||p.length<6){showToast('Password must be at least 6 characters','error');return;}
+  loginUser(n,e);
+}
+function loginUser(name,email){
+  state.user={name,email};
+  const initials=name.trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2)||'DR';
+  const av=document.getElementById('navAvatar');
+  av.textContent=initials;av.style.display='flex';
+  document.getElementById('navAuthBtn').style.display='none';
+  showToast(`Welcome, <strong>${name.split(' ')[0]}</strong>`,'success');
+  setTimeout(()=>goPage('home'),600);
+}
+
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+function goPage(p){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  // Update active nav link
+  document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active-link'));
+  const map={home:'nl-collection',lookbook:'nl-lookbook',auth:'nl-account'};
+  if(map[p])document.getElementById(map[p])?.classList.add('active-link');
+  window.scrollTo(0,0);
+  if(p==='auth')setTimeout(initAuthScene,50);
+  if(p==='lookbook')setTimeout(()=>{initLookbookHero();initLookbookCards();},50);
+}
+
+// ═══════════════════════════════════════════
+// TICKER
+// ═══════════════════════════════════════════
+function buildTicker(){
+  const items=['New Drop Available','Void Overcoat','Drift Wide Trouser','Limited Pieces','Nigeria Delivery','Haze Boxy Shirt','Flux Puffer','Arc Knit Vest','Signal Bucket Hat','Phase Scarf'];
+  const el=document.getElementById('ticker');
+  el.innerHTML=[...items,...items].map(t=>`<div class="ticker-item"><div class="ticker-dot"></div>${t}</div>`).join('');
+}
+
+// ═══════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════
+let toastTimer;
+function showToast(msg,type='info'){
+  const t=document.getElementById('toast');
+  const bar=document.getElementById('toastBar');
+  document.getElementById('toastText').innerHTML=msg;
+  const colors={success:'#c8a96e',error:'#c0392b',info:'rgba(245,240,235,0.3)'};
+  bar.style.background=colors[type]||colors.info;
+  t.classList.add('show');clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+function fmtNum(n){return Number(n).toLocaleString('en-NG',{minimumFractionDigits:2,maximumFractionDigits:2});}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+initMainScene();
+renderProducts();
+buildTicker();
+updateCartUI();
+
+window.addEventListener('load',()=>{
+  if(window.google?.accounts?.id){
+    google.accounts.id.initialize({
+      client_id:'712385176184-d3bivc48gpuv93b58d6mm85l1sgckonv.apps.googleusercontent.com',
+      callback:handleGoogleLogin,auto_select:false
+    });
+  }
+});
+</script>
+</body>
+</html>
