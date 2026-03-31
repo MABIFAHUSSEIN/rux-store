@@ -31,6 +31,19 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Rux Store API is running',
+    status: 'OK',
+    endpoints: {
+      signup: '/signup',
+      login: '/login',
+      googleAuth: '/auth/google',
+      profile: '/profile'
+    }
+  });
+});
+
 function generateToken(user) {
   return jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, {
     expiresIn: JWT_EXPIRES_IN
